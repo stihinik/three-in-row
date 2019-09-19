@@ -1,5 +1,6 @@
 local GAME = {}
 math.randomseed(os.time())
+--в данной функции генерируется игровое поле, размеры которого задает сам пользователь 
 function GAME:init (w,h)
 	local private ={}
 		private.cristal = {'A','B','C','D','E','F'}
@@ -17,8 +18,10 @@ function GAME:init (w,h)
 	setmetatable(private,self)
     self.__index = self; return private
 end
+-- вывод игрового поля в консоль
 function GAME:dump()
 	str ="   "
+	-- добавляем нумерацию игрового поля 
 	for i=0,self.my_w-1 do
 		if i<10 then
 			str = str..i.."  "
@@ -39,6 +42,7 @@ function GAME:dump()
 		print(str)   
 	end
 end 
+-- перемещение объектов в игровом поле, командами поступающими от игрока
 function GAME:move(com)
 	if (string.sub(com, 1, 1)=='m' and string.sub(com, 2, 2)==' ') then
 		begin_str = string.find(com," ")
@@ -80,6 +84,7 @@ function GAME:move(com)
 		print ("Некорректный ввод данных")
 	end
 end
+-- проверка находится ли в игровом поле три и более подряд одинаковых элементов
 function GAME:tick()
 	for i=1,self.my_h do
 		for j=1,self.my_w do
@@ -99,6 +104,7 @@ function GAME:tick()
 					flag =false
 				end
 			end 
+			-- удаление одинаковых элементов вдоль оси x
 			if (flag_x>=3) then
 			   for k=0,flag_x-1 do
 				for step = i,2,-1 do
@@ -108,6 +114,7 @@ function GAME:tick()
 					self.game[1][j+k]=self.cristal[nomber]
 			   end
 			end
+			-- удаление одинаковых элементов вдоль оси y
 			if (flag_y>=3) then
 				for step = (i+(flag_y-1)),(flag_y+1),-1 do
 					self.game[step][j] = self.game[step-(flag_y)][j]
@@ -120,11 +127,13 @@ function GAME:tick()
 		end  
 	end
 end
+-- проверяет есть в игром поле возможные ходы
 function GAME:mix()
 	flag = true
 	while flag do
 		for i=1,self.my_h do
 			for j=1,self.my_w do
+				--если игровое поле больше двух
 				if self.my_h>2 then
 					flag_1_x =(j+2<=self.my_w and i+1<=self.my_h and i-1>0)and(self.game[i][j] == self.game[i][j+2]) and ((self.game[i][j] == self.game[i+1][j+1])or(self.game[i][j] == self.game[i-1][j+1]))
 					flag_2_x =(j+3<=self.my_w and i+1<=self.my_h and i-1>0)and(self.game[i][j] == self.game[i][j+1]) and ((self.game[i][j] == self.game[i][j+3])or(self.game[i][j] == self.game[i-1][j+2])or(self.game[i][j] == self.game[i+1][j+2]))
@@ -136,6 +145,7 @@ function GAME:mix()
 						flag = false
 						break
 					end
+				--если игровое поле меньше или равно двум 
 				else
 					flag_1 =(j+3<=self.my_w and j-2>0)and(self.game[i][j] == self.game[i][j+1]) and ((self.game[i][j] == self.game[i][j+3])or(self.game[i][j] == self.game[i][j-2]))
 					flag_2 =(i+1<=self.my_h  and j+2<=self.my_w)and(self.game[i][j] == self.game[i][j+2]) and (self.game[i][j] == self.game[i+1][j+1])
@@ -152,6 +162,7 @@ function GAME:mix()
 				break
 			end
 		end
+		--генерация нового игрового поля если ходы не найдены
 		if flag then
 			for i=1,self.my_h do          
 				for j=1,self.my_w do
